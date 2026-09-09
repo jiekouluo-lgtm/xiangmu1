@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: smart-literature-rag
+  datasource:
+    url: jdbc:h2:file:${APP_DATA_PATH:./data}/knowledge;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  servlet:
+    multipart:
+      max-file-size: 30MB
+      max-request-size: 120MB
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  storage-path: ${APP_STORAGE_PATH:./uploads}
+  vector-store:
+    type: ${APP_VECTOR_STORE:milvus}
+  milvus:
+    uri: ${APP_MILVUS_URI:http://localhost:19530}
+    token: ${APP_MILVUS_TOKEN:root:Milvus}
+    collection: ${APP_MILVUS_COLLECTION:literature_chunks}
+  ai:
+    embedding-provider: ${APP_EMBEDDING_PROVIDER:local}
+    chat-provider: ${APP_CHAT_PROVIDER:local}
+    base-url: ${AI_BASE_URL:https://api.openai.com/v1}
+    api-key: ${AI_API_KEY:}
+    embedding-model: ${AI_EMBEDDING_MODEL:text-embedding-3-small}
+    chat-model: ${AI_CHAT_MODEL:gpt-4.1-mini}
+    dimension: ${AI_EMBEDDING_DIMENSION:384}
+  rag:
+    chunk-size: ${RAG_CHUNK_SIZE:700}
+    chunk-overlap: ${RAG_CHUNK_OVERLAP:120}
+    top-k: ${RAG_TOP_K:5}
+
+logging:
+  level:
+    root: INFO
+    cn.edu.rag: INFO

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="基于 Spring Boot 与 Milvus 的本地文献知识库智能检索系统">
+    <title>智阅 RAG · 文献知识库</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+        <div class="brand">
+            <div class="brand-mark">阅</div>
+            <div><strong>智阅 RAG</strong><span>文献知识库</span></div>
+        </div>
+        <nav>
+            <button class="nav-item active" data-page="dashboard"><span>⌂</span>工作台</button>
+            <button class="nav-item" data-page="documents"><span>▤</span>文献管理</button>
+            <button class="nav-item" data-page="chat"><span>✦</span>智能问答</button>
+            <button class="nav-item" data-page="history"><span>◷</span>问答记录</button>
+        </nav>
+        <div class="sidebar-foot">
+            <div class="status-line"><i id="statusDot"></i><span id="statusText">正在检查服务</span></div>
+            <small>Spring Boot · Milvus · RAG</small>
+        </div>
+    </aside>
+
+    <main>
+        <header class="topbar">
+            <button class="icon-button menu-button" id="menuButton" aria-label="打开菜单">☰</button>
+            <div><h1 id="pageTitle">工作台</h1><p id="pageSubtitle">掌握知识库的最新状态</p></div>
+            <button class="primary compact" data-go="chat">＋ 开始提问</button>
+        </header>
+
+        <section class="page active" id="dashboardPage">
+            <div class="hero">
+                <div><span class="eyebrow">LOCAL KNOWLEDGE BASE</span>
+                    <h2>让每一份资料，都能被准确问到</h2>
+                    <p>上传本地文献，系统会自动解析、切片并写入 Milvus，通过检索增强生成给出有据可查的回答。</p>
+                    <div class="hero-actions"><button class="primary" data-go="documents">上传文献</button><button class="ghost" data-go="chat">试试问答</button></div>
+                </div>
+                <div class="hero-visual"><div class="orbit o1"></div><div class="orbit o2"></div><div class="core">RAG</div><span class="node n1">PDF</span><span class="node n2">TXT</span><span class="node n3">AI</span></div>
+            </div>
+            <div class="stats-grid">
+                <article class="stat"><span>文献总数</span><strong id="documentCount">0</strong><small>已导入知识库</small></article>
+                <article class="stat"><span>可用文献</span><strong id="readyCount">0</strong><small>已完成向量化</small></article>
+                <article class="stat"><span>知识片段</span><strong id="chunkCount">0</strong><small>Milvus 检索单元</small></article>
+                <article class="stat"><span>累计提问</span><strong id="questionCount">0</strong><small>问答历史记录</small></article>
+            </div>
+            <div class="panel-grid">
+                <article class="panel"><div class="panel-head"><div><h3>快速开始</h3><p>三步完成一次知识问答</p></div></div>
+                    <div class="steps"><div><b>1</b><span><strong>导入资料</strong><small>支持批量 PDF、TXT、Markdown</small></span></div><div><b>2</b><span><strong>自动构建索引</strong><small>解析、切片并写入 Milvus</small></span></div><div><b>3</b><span><strong>提出问题</strong><small>生成答案并展示原文依据</small></span></div></div>
+                </article>
+                <article class="panel"><div class="panel-head"><div><h3>最近提问</h3><p>最新的知识库查询</p></div><button class="text-button" data-go="history">查看全部</button></div><div id="recentHistory" class="empty compact-empty">暂无提问记录</div></article>
+            </div>
+        </section>
+
+        <section class="page" id="documentsPage">
+            <div class="section-grid">
+                <article class="panel upload-panel">
+                    <div class="panel-head"><div><h3>导入文献</h3><p>单次最多 20 个，单文件不超过 30MB</p></div></div>
+                    <label class="drop-zone" id="dropZone">
+                        <input type="file" id="fileInput" accept=".pdf,.txt,.md,.markdown" multiple hidden>
+                        <span class="upload-icon">⇧</span><strong>点击选择或拖放文件</strong><small>支持 PDF / TXT / Markdown</small>
+                    </label>
+                    <div id="selectedFiles" class="selected-files"></div>
+                    <button class="primary full" id="uploadButton" disabled>上传并构建知识库</button>
+                </article>
+                <article class="panel tips"><h3>导入说明</h3><ul><li>扫描版 PDF 暂不支持 OCR，请使用含文字层的文件。</li><li>处理完成后状态会变为“可用”。</li><li>更换向量模型维度时，需要重建 Milvus 集合。</li></ul></article>
+            </div>
+            <article class="panel table-panel"><div class="panel-head"><div><h3>文献列表</h3><p id="documentSummary">共 0 份文献</p></div><button class="ghost compact" id="refreshDocuments">刷新</button></div>
+                <div class="table-wrap"><table><thead><tr><th>文献</th><th>大小</th><th>页数</th><th>片段</th><th>状态</th><th>导入时间</th><th>操作</th></tr></thead><tbody id="documentTable"><tr><td colspan="7" class="empty">暂无文献</td></tr></tbody></table></div>
+            </article>
+        </section>
+
+        <section class="page" id="chatPage">
+            <div class="chat-layout">
+                <article class="chat-panel">
+                    <div class="chat-head"><div><span class="ai-avatar">✦</span><div><h3>知识库助手</h3><p>回答会严格依据已导入文献</p></div></div><button class="ghost compact" id="clearChat">清空当前对话</button></div>
+                    <div class="messages" id="messages"><div class="message assistant"><span class="avatar">✦</span><div class="bubble">你好，我是智阅知识库助手。请先导入资料，然后向我提问吧。</div></div></div>
+                    <form class="composer" id="chatForm"><textarea id="questionInput" maxlength="1000" rows="2" placeholder="输入与文献相关的问题，Enter 发送，Shift + Enter 换行"></textarea><button class="send-button" aria-label="发送">➤</button></form>
+                </article>
+                <aside class="source-panel"><div class="panel-head"><div><h3>参考来源</h3><p>点击查看命中的原文片段</p></div></div><div id="sources" class="empty">提问后将在这里展示引用来源</div></aside>
+            </div>
+        </section>
+
+        <section class="page" id="historyPage">
+            <article class="panel"><div class="panel-head"><div><h3>问答记录</h3><p>保留最近的知识查询与回答</p></div><button class="danger-text" id="clearHistory">清空记录</button></div><div id="historyList" class="history-list"><div class="empty">暂无问答记录</div></div></article>
+        </section>
+    </main>
+</div>
+<div class="toast" id="toast"></div>
+<script src="/js/app.js" defer></script>
+</body>
+</html>
