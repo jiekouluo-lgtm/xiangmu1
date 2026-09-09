@@ -30,7 +30,7 @@ public class TextChunker {
                 int minimumBreak = start + chunkSize / 2;
                 int best = -1;
                 for (char candidate : BREAKS) {
-                    int found = text.lastIndexOf(candidate, hardEnd);
+                    int found = text.lastIndexOf(candidate, hardEnd - 1);
                     if (found >= minimumBreak) best = Math.max(best, found + 1);
                 }
                 if (best > start) end = best;
