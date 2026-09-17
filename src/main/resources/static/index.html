@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="基于 Spring Boot 与 Milvus 的本地文献知识库智能检索系统">
+    <meta name="theme-color" content="#4864e6">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="智阅 RAG">
     <title>智阅 RAG · 文献知识库</title>
+    <link rel="manifest" href="/manifest.webmanifest">
+    <link rel="icon" href="/icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icons/icon-180.png">
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
@@ -30,7 +38,10 @@
         <header class="topbar">
             <button class="icon-button menu-button" id="menuButton" aria-label="打开菜单">☰</button>
             <div><h1 id="pageTitle">工作台</h1><p id="pageSubtitle">掌握知识库的最新状态</p></div>
-            <button class="primary compact" data-go="chat">＋ 开始提问</button>
+            <div class="topbar-actions">
+                <button class="ghost compact install-button" id="installButton" hidden>⇩ 安装应用</button>
+                <button class="primary compact" data-go="chat">＋ 开始提问</button>
+            </div>
         </header>
 
         <section class="page active" id="dashboardPage">

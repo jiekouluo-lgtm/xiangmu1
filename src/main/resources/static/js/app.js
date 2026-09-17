@@ -7,6 +7,7 @@ const pageMeta = {
   history: ['问答记录', '回顾已经完成的知识查询']
 };
 let selectedFiles = [];
+let deferredInstallPrompt = null;
 
 async function api(path, options = {}) {
   const response = await fetch(path, options);
@@ -187,5 +188,30 @@ $('#chatForm').addEventListener('submit', askQuestion);
 $('#questionInput').addEventListener('keydown', event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); $('#chatForm').requestSubmit(); } });
 $('#clearChat').addEventListener('click', () => { $('#messages').innerHTML = '<div class="message assistant"><span class="avatar">✦</span><div class="bubble">当前对话已清空，可以继续提问。</div></div>'; renderSources([]); });
 $('#clearHistory').addEventListener('click', async () => { if (!confirm('确认清空全部问答记录吗？')) return; try { await api('/api/history', {method: 'DELETE'}); toast('问答记录已清空'); loadHistory(); loadDashboard(); } catch (error) { toast(error.message, true); } });
+
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  deferredInstallPrompt = event;
+  $('#installButton').hidden = false;
+});
+
+$('#installButton').addEventListener('click', async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  $('#installButton').hidden = true;
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredInstallPrompt = null;
+  $('#installButton').hidden = true;
+  toast('智阅 RAG 已安装到设备');
+});
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('/service-worker.js')
+    .catch(() => console.warn('Service Worker 注册失败')));
+}
 
 loadStatus(); loadDashboard(); setInterval(loadStatus, 30000);
