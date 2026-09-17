@@ -15,6 +15,7 @@
 - 本地零密钥模式 / OpenAI 兼容模型模式
 - H2 本地持久化、Docker 一键启动、GitHub Actions 自动测试
 - 响应式中文界面，适配电脑和手机
+- PWA 安装支持，可从 Chrome 或 Edge 添加到手机桌面及 Windows 开始菜单
 
 ## 系统结构
 
@@ -58,6 +59,16 @@ docker compose down
 ```
 
 文献、元数据和 Milvus 数据分别保存在 `uploads/`、`data/` 和 `volumes/`，停止容器不会删除数据。
+
+## 安装到手机或电脑
+
+系统支持 PWA。部署到带 HTTPS 的公网地址后，手机和电脑共用同一个云端知识库：
+
+- Android：使用 Chrome 打开系统，点击页面中的“安装应用”；若按钮未出现，可从浏览器菜单选择“安装应用”。
+- Windows：使用 Edge 或 Chrome 打开系统，点击地址栏右侧的安装图标，或点击页面中的“安装应用”。
+- 安装后会生成独立图标，并以无浏览器地址栏的应用窗口运行。
+
+应用外壳可以离线打开，但文献上传、Milvus 检索和问答依赖云端服务，需要保持网络连接。
 
 ## 不使用 Docker 运行应用
 
@@ -131,8 +142,11 @@ src/main/java/cn/edu/rag
 
 src/main/resources/static
 ├── css          响应式样式
+├── icons        PWA 应用图标
 ├── js           页面交互与接口调用
-└── index.html   单页应用入口
+├── manifest.webmanifest  安装清单
+├── service-worker.js     应用外壳缓存
+└── index.html            单页应用入口
 ```
 
 更多材料：
